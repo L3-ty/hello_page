@@ -1,11 +1,9 @@
 ---
 title: "LTarin portfolio"
-format: html
+format: 
+  html:
     toc: true
     toc-title: "On This Page:"
-    search: false
-editor_options: 
-  chunk_output_type: console
 ---
 
 ```{r}
@@ -14,7 +12,182 @@ library(scales)
 theme_set(theme_light())
 ```
 
+## Overview
+
+Below are a few samples of analysis I've completed. All analysis was done in the RStudio IDE. Click the **Code** button above the figure to view the code used to create each graph.
+
 ```{r}
+#| output: false
+#| echo: false
+
+
+
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+theme_set(theme_light())
+```
+
+```{r}
+#| output: false
+#| echo: false
+
+march_school_year <- read_csv("~/Desktop/March/march_school_year.csv")
+march_gender <- read_csv("~/Desktop/March/march_gender.csv")
+
+my_postings <- read_csv("/Users/lt/Desktop/2025/my_employer_postings_and_applications_nov_to_feb17.csv") %>% 
+mutate(job_id = as.factor(job_id),employer_name = as.factor(employer_name), industry = as.factor(industry), 
+       max_salary = replace_na(max_salary, 0))
+
+
+five_yrs <- last_5_years <- read_csv("~/Downloads/last 5 years.csv") %>% 
+rename(date = "Postings Responded On Date") %>% 
+ mutate(date = as.Date(date, "%m/%d/%Y"),
+         year = year(date))
+
+
 
 ```
 
+### March 2024
+
+This analysis was to explore the top industries and applicants in March 2024. The first graph is a visualization of applicants by school year, including advanced degrees and alumni. The second graph is visualizes the total applicants by gender.
+
+```{r}
+#| code-fold: true
+#| cap-location: margin
+
+sy_longer <- march_school_year |> 
+  pivot_longer(
+    cols = alumni:sophomore,
+    names_to = "school_year",
+    values_to = "applicants",
+    values_drop_na = TRUE
+  )
+
+sy_longer |> 
+  mutate(school_year = school_year |> fct_infreq() |> fct_rev()) |> 
+  ggplot(aes(school_year, fill = school_year)) +
+  geom_bar(show.legend = FALSE)+
+  scale_color_brewer(palette = "Set1")+
+  labs(
+    x = "",
+    y = "",
+    title = "Number of Applicants by School Year",
+    subtitle = "March 2024"
+  )
+
+
+march_longer <- march_gender |> 
+  pivot_longer(
+    cols = female:male,
+    names_to = "gender",
+    values_to = "applicants",
+    values_drop_na = TRUE
+  )
+
+march_longer |> 
+  drop_na(job_type) |> 
+  mutate(job_type = job_type |> fct_rev()) |> 
+  ggplot(aes(job_type, fill = gender)) +
+  geom_bar(position = "dodge")+
+  scale_color_brewer(palette = "Set1")+
+  labs(x = "",
+       y = "",
+       fill = "Gender",
+       title = "Applicants by Job Type and Gender", 
+       subtitle = "March 2024")
+
+```
+
+```{r}
+#| code-fold: true
+#| message: false
+
+applications <- my_postings 
+
+applications |> 
+group_by(industry) |> 
+  summarize(total = sum(applications_count)) |> 
+  arrange(desc(total)) %>% 
+  slice_head(n = 20) %>% 
+  ungroup() %>% 
+  mutate(industry = fct_reorder(industry, total)) %>% 
+ggplot(aes(industry, total, fill = industry)) +
+  geom_col() +
+  coord_flip() +
+  theme(legend.position = "none") +
+  labs(x = "Industry",
+       y = "Number of applicants",
+       title = "Total Student Applicants by Industry",
+       subtitle = "November 2024 to February 2025")
+```
+
+```{r}
+#| code-fold: true
+
+applications <- my_postings 
+
+
+applications |>
+group_by(industry) |> 
+  summarize(total = sum(applications_count)) |> 
+  arrange(desc(total)) %>% 
+  slice_head(n = 20) %>% 
+  ungroup() %>% 
+  mutate(industry = fct_reorder(industry, total)) %>% 
+  ggplot(aes(industry, total, color = industry, size = total)) +
+  geom_point() +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  theme(legend.position = "none") +
+  labs(x = "Industry",
+       y = "Number of applicants",
+       title = "Total Student Applicants by Industry",
+       subtitle = "November 2024 to February 2025") 
+
+
+
+```
+
+### Employer Industries
+
+```{r}
+#| code-fold: true
+
+top_industries <- my_postings
+
+top_industries %>% 
+ count(industry, sort = TRUE) %>% 
+  slice_head(n = 20) |> 
+  mutate(industry = fct_reorder(industry, n)) |> 
+  ggplot(aes(industry, n, fill = industry))+
+  geom_col()+
+  coord_flip()+
+  theme(legend.position = "none")+
+  labs(title = "Top Employer Industries",
+       subtitle = "November 2024 to February 2025", 
+       x = "Industry",
+       y = "Postings count")
+
+```
+
+### Applications 2021-2024
+
+```{r}
+#| code-fold: true
+
+five_yrs %>% 
+  filter(year != 2025 & !is.na(year)) %>% 
+  group_by(year) %>% 
+  summarize(total = sum(applications_count),
+            n = n()) %>% 
+  ggplot(aes(year,total)) +
+  geom_line() +
+  scale_y_continuous(labels = comma) +
+  labs(x = "Year",
+       y = "Applications",
+       title = "Total Applications from 2021 to 2024")
+
+
+```
