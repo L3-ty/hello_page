@@ -1,16 +1,28 @@
 ---
-title: "LTarin portfolio"
+title: "Letty Tarin"
 format: 
   html:
     toc: true
     toc-title: "On This Page:"
+    code-fold: true
+    code-tools: false
+    source: false
+    search: false
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r}
+#| output: false
+#| echo: false
+
+
 library(tidyverse)
 library(scales)
+library(RColorBrewer)
 theme_set(theme_light())
 ```
+
 
 ## Overview
 
@@ -19,8 +31,6 @@ Below are a few samples of analysis I've completed. All analysis was done in the
 ```{r}
 #| output: false
 #| echo: false
-
-
 
 library(tidyverse)
 library(scales)
@@ -51,7 +61,7 @@ rename(date = "Postings Responded On Date") %>%
 
 ### March 2024
 
-This analysis was to explore the top industries and applicants in March 2024. The first graph is a visualization of applicants by school year, including advanced degrees and alumni. The second graph is visualizes the total applicants by gender.
+This analysis was to explore the top industries and applicants in March 2024. The first graph is a visualization of applicants by school year, including advanced degrees and alumni. The second graph visualizes the total applicants by gender.
 
 ```{r}
 #| code-fold: true
@@ -100,29 +110,8 @@ march_longer |>
 
 ```
 
-```{r}
-#| code-fold: true
-#| message: false
-
-applications <- my_postings 
-
-applications |> 
-group_by(industry) |> 
-  summarize(total = sum(applications_count)) |> 
-  arrange(desc(total)) %>% 
-  slice_head(n = 20) %>% 
-  ungroup() %>% 
-  mutate(industry = fct_reorder(industry, total)) %>% 
-ggplot(aes(industry, total, fill = industry)) +
-  geom_col() +
-  coord_flip() +
-  theme(legend.position = "none") +
-  labs(x = "Industry",
-       y = "Number of applicants",
-       title = "Total Student Applicants by Industry",
-       subtitle = "November 2024 to February 2025")
-```
-
+### Applicants by Industry 
+The following was completed to get a snapshot of student engagement during the end of the fall semester. 
 ```{r}
 #| code-fold: true
 
@@ -151,6 +140,7 @@ group_by(industry) |>
 ```
 
 ### Employer Industries
+This graph shows employer engagement by industry during the end of the fall semester. It reflects the number of job and internship postings by industry, versus student applications by industry as above. 
 
 ```{r}
 #| code-fold: true
@@ -174,6 +164,7 @@ top_industries %>%
 
 ### Applications 2021-2024
 
+Another snapshot to see the number of applicants from 2021 to 2024.
 ```{r}
 #| code-fold: true
 
