@@ -1,0 +1,20 @@
+---
+title: "LTarin portfolio"
+format: html
+    toc: true
+    toc-title: "On This Page:"
+    search: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(scales)
+theme_set(theme_light())
+```
+
+```{r}
+
+```
+
