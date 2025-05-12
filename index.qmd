@@ -19,6 +19,7 @@ editor_options:
 
 library(tidyverse)
 library(scales)
+library(plotly)
 library(RColorBrewer)
 theme_set(theme_light())
 ```
@@ -26,17 +27,8 @@ theme_set(theme_light())
 
 ## Overview
 
-Below are a few samples of analysis I've completed. All analysis was done in the RStudio IDE. Click the **Code** button above the figure to view the code used to create each graph.
+This page includes a few samples of data analysis projects I've completed over the past year at UT. The analyses included students from all colleges, majors and school years. The employer industries include only the industries I moderate. All analyses were done in the RStudio IDE. Click the **Code** button above the figure to view the code used to create each graph.
 
-```{r}
-#| output: false
-#| echo: false
-
-library(tidyverse)
-library(scales)
-library(RColorBrewer)
-theme_set(theme_light())
-```
 
 ```{r}
 #| output: false
@@ -61,11 +53,11 @@ rename(date = "Postings Responded On Date") %>%
 
 ### March 2024
 
-This analysis was to explore the top industries and applicants in March 2024. The first graph is a visualization of applicants by school year, including advanced degrees and alumni. The second graph visualizes the total applicants by gender.
+This first example includes graphs that were part of a larger analysis I completed in March 2024 that covered top industries, number of applicants by college, gender and school year. The first graph is a visualization of applicants by school year, including advanced degrees and alumni. The second graph visualizes the total applicants by gender.
 
 ```{r}
 #| code-fold: true
-#| cap-location: margin
+
 
 sy_longer <- march_school_year |> 
   pivot_longer(
@@ -110,50 +102,68 @@ march_longer |>
 
 ```
 
-### Applicants by Industry 
-The following was completed to get a snapshot of student engagement during the end of the fall semester. 
 ```{r}
-#| code-fold: true
+#| output: false
+#| echo: false
 
-applications <- my_postings 
-
-
-applications |>
-group_by(industry) |> 
-  summarize(total = sum(applications_count)) |> 
+applications <- my_postings %>% 
+group_by(industry) %>%  
+  summarize(total = sum(applications_count)) %>% 
   arrange(desc(total)) %>% 
   slice_head(n = 20) %>% 
   ungroup() %>% 
-  mutate(industry = fct_reorder(industry, total)) %>% 
-  ggplot(aes(industry, total, color = industry, size = total)) +
-  geom_point() +
+  mutate(industry = fct_reorder(industry, total)) 
+
+```
+
+
+### Top 20 Most Applied To
+The following example was completed to explore student engagement during the end of the Fall 2024 semester and early Spring 2025 semester. It reflects the top 20 industries most applied to during this time. This includes only the industries I moderate. 
+```{r}
+#| code-fold: true
+
+applications %>% 
+  ggplot(aes(x = industry, y = total, fill = industry)) +
+  geom_col() +
   coord_flip() +
   scale_y_continuous(labels = comma) +
   theme(legend.position = "none") +
   labs(x = "Industry",
        y = "Number of applicants",
        title = "Total Student Applicants by Industry",
-       subtitle = "November 2024 to February 2025") 
+       subtitle = "November 2024 to February 2025") +
+  theme(legend.position = "none")
+
 
 
 
 ```
 
-### Employer Industries
-This graph shows employer engagement by industry during the end of the fall semester. It reflects the number of job and internship postings by industry, versus student applications by industry as above. 
+```{r}
+#| output: false
+#| echo: false
+
+
+
+top_industries <- my_postings %>% 
+ count(industry, sort = TRUE) %>% 
+  slice_head(n = 20) |> 
+  mutate(industry = fct_reorder(industry, n))
+
+
+```
+
+### Top 20 Employer Industries
+This graph shows the number of job and internship postings by industry at the end of the Fall 2024 semester and early Spring 2025. It reflects the number of job and internship postings by industry, versus the student applications by industry as in the graph above. 
 
 ```{r}
 #| code-fold: true
 
-top_industries <- my_postings
-
 top_industries %>% 
- count(industry, sort = TRUE) %>% 
-  slice_head(n = 20) |> 
-  mutate(industry = fct_reorder(industry, n)) |> 
   ggplot(aes(industry, n, fill = industry))+
   geom_col()+
   coord_flip()+
+  scale_y_continuous(labels = comma) +
   theme(legend.position = "none")+
   labs(title = "Top Employer Industries",
        subtitle = "November 2024 to February 2025", 
@@ -163,10 +173,11 @@ top_industries %>%
 ```
 
 ### Applications 2021-2024
+Another snapshot here to see the number of student applications from 2021 to 2024.
 
-Another snapshot to see the number of applicants from 2021 to 2024.
 ```{r}
 #| code-fold: true
+
 
 five_yrs %>% 
   filter(year != 2025 & !is.na(year)) %>% 
