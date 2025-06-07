@@ -27,7 +27,7 @@ theme_set(theme_light())
 
 ## Overview
 
-This page includes a few samples of data analysis projects I've completed over the past year at UT. The analyses included students from all colleges, majors and school years. The employer industries include only the industries I moderate. All analyses were done in the RStudio IDE. Click the **Code** button above the figure to view the code used to create each graph.
+This page includes a few samples of data analysis projects I've completed over the past year. The analyses included students from all colleges, majors and school years. The employer industries include only the industries I moderate. All analyses were done in the RStudio IDE. Click the **Code** button above the figure to view the code used to create each graph.
 
 
 ```{r}
